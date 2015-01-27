@@ -1,0 +1,5 @@
+#Ignoring some files
+*.pyc
+*~
+*.swap
+*.ttf
