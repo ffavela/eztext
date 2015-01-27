@@ -19,9 +19,10 @@ class Input:
     """ A text input for pygame apps """
     def __init__(self, **options):
         """ Options: x, y, font, color, restricted, maxlength, prompt """
-        self.options = Config(options, ['x', '0'], ['y', '0'], ['font', 'pygame.font.Font(None, 32)'],
-                              ['color', '(0,0,0)'], ['restricted', '\'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\\\'()*+,-./:;<=>?@[\]^_`{|}~\''],
-                              ['maxlength', '-1'], ['prompt', '\'\''])
+        self.options = Config(options, ['x', '0'], ['y', '0'], ['font','pygame.font.Font("Times_New_Roman.ttf", 25)'],
+                              ['color', '(0,0,0)'], ['restricted',
+ '\'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\\\'()*+,-./:;<=>?@[\]^_`{|}~\''],
+                              ['maxlength', '-1'], ['prompt', '\'\''],['focus','False'])
         self.x = self.options.x; self.y = self.options.y
         self.font = self.options.font
         self.color = self.options.color
@@ -29,6 +30,8 @@ class Input:
         self.maxlength = self.options.maxlength
         self.prompt = self.options.prompt; self.value = ''
         self.shifted = False
+        self.pause = 0
+        self.focus = self.options.focus
 
     def set_pos(self, x, y):
         """ Set the position to x, y """
@@ -46,6 +49,18 @@ class Input:
 
     def update(self, events):
         """ Update the input based on passed events """
+        if self.focus != True:
+            return
+
+        pressed = pygame.key.get_pressed()#Add ability to hold down delete key and delete text
+        if self.pause == 3 and pressed[K_BACKSPACE]:
+            self.pause = 0
+            self.value = self.value[:-1]
+        elif pressed[K_BACKSPACE]:
+            self.pause += 1
+        else:
+            self.pause = 0
+
         for event in events:
             if event.type == KEYUP:
                 if event.key == K_LSHIFT or event.key == K_RSHIFT: self.shifted = False
@@ -53,6 +68,7 @@ class Input:
                 if event.key == K_BACKSPACE: self.value = self.value[:-1]
                 elif event.key == K_LSHIFT or event.key == K_RSHIFT: self.shifted = True
                 elif event.key == K_SPACE: self.value += ' '
+                elif event.key == K_RETURN: return self.value#return value
                 if not self.shifted:
                     if event.key == K_a and 'a' in self.restricted: self.value += 'a'
                     elif event.key == K_b and 'b' in self.restricted: self.value += 'b'
